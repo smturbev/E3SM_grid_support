@@ -1,8 +1,10 @@
+#!/ascldap/users/smturbe/.conda/envs/smt_met/bin/python
+
 import os, numpy as np, xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
-import hapy
-home = os.getenv('HOME')
+
+
 #-------------------------------------------------------------------------------
 # Grid registration
 #-------------------------------------------------------------------------------
@@ -13,33 +15,47 @@ def add_grid(file_path, **kwargs):
         case_opts[k] = val
     opt_list.append(case_opts)
 #-------------------------------------------------------------------------------
-# add_grid(f'{home}/HICCUP/files_vert/L80_for_E3SMv3.nc',       n='L80 EAMv3 default')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_55km.nc', n='L78 top~55km')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_50km.nc', n='L76 top~50km')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_45km.nc', n='L74 top~45km')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_40km.nc', n='L72 top~40km')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_35km.nc', n='L70 top~35km')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_30km.nc', n='L67 top~30km')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_25km.nc', n='L63 top~25km')
-# add_grid(f'{home}/E3SM/vert_grid_files/E3SMv3_L80-truncated_20km.nc', n='L55 top~20km')
 
-add_grid(f'{home}/HICCUP/files_vert/vert_coord_E3SM_L128.nc',          n='L128v1.0',d=0,c='black'  )
-add_grid(f'{home}/E3SM/vert_grid_files/SCREAM_L128_v3.0_c20251112.nc', n='L128 v3.0',c='red')
-add_grid(f'{home}/E3SM/vert_grid_files/SCREAM_L128_v3.1_c20251112.nc', n='L128 v3.1',c='blue')
+grid_root = '/projects/ccsm/inputdata/atm/scream/init'
+add_grid(f'{grid_root}/vertical_coordinates_L128_20220927.nc', n='L128', c='gray', sponge="14")
+add_grid(f'{grid_root}/vertical_coordinates_L72_20220927.nc', n='L72',  c='black')
 
-# add_grid(f'{home}/E3SM/vert_grid_files/SCREAM_L128_v3.1_c20251112.nc',        n='L128 v3.1',       c='red')
-# add_grid(f'{home}/E3SM/vert_grid_files/SCREAM_L128_v3.1_c20251112_p-bias.nc', n='L128 v3.1 p-bias',c='green',ls='dashed')
-# add_grid(f'{home}/E3SM/vert_grid_files/SCREAM_L128_v3.1_c20251112_t-bias.nc', n='L128 v3.1 t-bias',c='blue' ,ls='dotted')
+grid_root = '/tscratch/smturbe/strat_scratch/vert_grid_files'
+# add_grid(f'{grid_root}/SCREAM_L236_c20250512_alpha_1.0_pm_300.nc',  n='L236', c='gray')
+# add_grid(f'{grid_root}/SCREAM_vertical_levels_L184.nc',   n='L184 alpha=1.0 pm=300', c='red')
+# add_grid(f'{grid_root}/vertical_coordinates_L177_20260507.nc',  n='L177', c='pink')
+# add_grid(f'{grid_root}/SCREAM_L232_c20250512_alpha_1.0_pm_300.nc', n='L232', c='gray')
+# add_grid(f'{grid_root}/SCREAM_L182_c20250512_alpha_1.0_pm_300.nc', n='L184', c='purple')
 
+# 10 vlevs with different slopes
+# slope = 0
+# add_grid(f"{grid_root}/SCREAM_L234_c20250512_alpha_1.0_pm_300.nc", n="L234", c="red")
+# slope =  2 m / level
+# add_grid(f"{grid_root}/SCREAM_L208_c20250512_alpha_1.0_pm_300.nc", n="L208", c="red")
+# # slope =  5 m / level
+add_grid(f"{grid_root}/SCREAM_L192_c20250512_alpha_1.0_pm_300.nc",n="L192", c="orange", sponge="19")
+# add_grid(f"{grid_root}/SCREAM_L171_c20250512_alpha_1.0_pm_300.nc", n="L171", c="yellow")
+# # slope = 10 m / level
+# add_grid(f"{grid_root}/SCREAM_L155_c20250512_alpha_1.0_pm_300.nc", n="L155", c="yellowgreen")
+# # slope = 20 m / level
+# add_grid(f"{grid_root}/SCREAM_L160_c20250512_alpha_1.0_pm_300.nc",n="L160", c="green")
+# # slope = 30 m / level
+# add_grid(f"{grid_root}/SCREAM_L152_c20250512_alpha_1.0_pm_300.nc", n="L152", c="C0")
+# # slope = 50 m / level
+# add_grid(f"{grid_root}/SCREAM_L126_c20250512_alpha_1.0_pm_300.nc", n="L126", c="purple")
 
 #-------------------------------------------------------------------------------
 # Settings
 #-------------------------------------------------------------------------------
-fig_file        = os.path.join('figs_vert_grid/vertical_grid_spacing.png')
 print_table     = False
-use_height      = False   # use height (km) for Y-axis; else use pressure (hPa)
+use_height      = True   # use height (km) for Y-axis; else use pressure (hPa)
 add_zoomed_plot = False
-zoom_top_idx    = -30    # index cutoff for zoomed panel
+add_sponge_layer = True
+zoom_top_idx    = -30     # index cutoff for zoomed panel
+if use_height:
+    fig_file    = os.path.join('figs_vert_grid/vertical_grid_spacing_km.png')
+else:
+    fig_file    = os.path.join('figs_vert_grid/vertical_grid_spacing_mb.png')
 
 #-------------------------------------------------------------------------------
 # Assign unique colors to any grid that didn't specify one
@@ -74,31 +90,6 @@ if print_table:
                 msg += f'     {mlev[k]:8.2f} mb   {zlev[k]:8.1f} m'
         print(msg)
 
-#-------------------------------------------------------------------------------
-# Load data
-#-------------------------------------------------------------------------------
-mlev_list = []
-dlev_list = []
-
-for opts in opt_list:
-    ds    = xr.open_dataset(opts['file'])
-    mlev  = ds['hyam'].values * 1000 + ds['hybm'].values * 1000
-    ilev  = ds['hyai'].values * 1000 + ds['hybi'].values * 1000
-
-    ilevz = np.log(ilev / 1e3) * -6740.         # interface heights [m]
-    mlevz = np.log(mlev / 1e3) * -6740. / 1e3   # midpoint heights  [km]
-
-    lbl = opts.get('n', opts['file'])
-    hapy.print_stat(mlev,  name=lbl+' mlev', stat='nxh', indent='    ', compact=True)
-    hapy.print_stat(mlevz, name=lbl+' zlev', stat='nxh', indent='    ', compact=True)
-
-    dlevz = np.array([ilevz[k] - ilevz[k+1] for k in range(len(mlev))])
-
-    if use_height:
-        mlev_list.append(mlevz)
-    else:
-        mlev_list.append(mlev)
-    dlev_list.append(dlevz)
 
 #-------------------------------------------------------------------------------
 # Create figure
@@ -121,23 +112,37 @@ for ax in axes:
     ax.set_ylabel(ylabel, fontsize=11)
     ax.tick_params(direction='in', which='both')
 
-# ---- Axis limits ----
-dlev_min  = min(np.nanmin(d)              for d in dlev_list)
-dlev_max  = max(np.nanmax(d)              for d in dlev_list)
-mlev_min  = min(np.nanmin(m)              for m in mlev_list)
-mlev_max  = max(np.nanmax(m)              for m in mlev_list)
-dlev_max2 = max(np.nanmax(d[zoom_top_idx:]) for d in dlev_list)
-mlev_min2 = min(np.nanmin(m[zoom_top_idx:]) for m in mlev_list)
-mlev_max2 = max(np.nanmax(m[zoom_top_idx:]) for m in mlev_list)
+# ---- Load data -----
+for opts in opt_list:
+    ds    = xr.open_dataset(opts['file'])
+    mlev  = ds['hyam'].values * 1000 + ds['hybm'].values * 1000
+    ilev  = ds['hyai'].values * 1000 + ds['hybi'].values * 1000
 
-x_pad = (dlev_max - dlev_min) * 0.05
-ax1.set_xlim(dlev_min, dlev_max + x_pad)
-# ax1.set_ylim(mlev_min, mlev_max + (mlev_max - mlev_min) * 0.05)
+    ilevz = np.log(ilev / 1e3) * -6740.         # interface heights [m]
+    mlevz = np.log(mlev / 1e3) * -6740. / 1e3   # midpoint heights  [km]
 
-if use_height:
-    ax1.set_ylim(mlev_min, mlev_max + (mlev_max - mlev_min) * 0.15)
-else:
-    ax1.set_ylim(mlev_min * 0.5, mlev_max + (mlev_max - mlev_min) * 0.05)
+    lbl = opts.get('n', opts['file'])
+
+    dlevz = np.array([ilevz[k] - ilevz[k+1] for k in range(len(mlev))])
+
+    color = opts['c']
+    ls    = opts['ls'] if 'ls' in opts else 'solid'
+    sponge_layer=int(opts['sponge']) if 'sponge' in opts else None
+    ms    = 2
+    if use_height:
+        lev = mlevz
+    else:
+        lev = mlev
+    ax1.plot(dlevz, lev, color=color, linestyle=ls,
+                    linewidth=lw, marker='o', markersize=ms, label=lbl)
+    ax1.plot(dlevz[0], lev[0], marker='_', color=color, markersize=30,   # <-- top marker
+                markeredgecolor='black', markeredgewidth=0.5, zorder=5)
+    if add_sponge_layer:
+        if sponge_layer is not None:
+            ax1.axhline(y=lev[sponge_layer], xmin=0, xmax=2500, color=color, linestyle="dashed", alpha=0.7)
+    if ax2 is not None:
+        ax2.plot(dlevz, mlevz, color=color, linestyle=ls,
+                 linewidth=lw, marker='o', markersize=ms)
 
 if ax2 is not None:
     ax2.set_xlim(0, 100)
@@ -149,26 +154,8 @@ if not use_height:
         ax.invert_yaxis()
     ax1.set_yscale('log')
 
-# ---- Plot lines ----
-handles = []
-for opts, mlev, dlev in zip(opt_list, mlev_list, dlev_list):
-    label = opts.get('n', opts['file'])
-    color = opts['c']
-    ls    = opts['ls'] if 'ls' in opts else 'solid'
-    # ls    = '--' if opts.get('d', 0) else '-'
-
-    line, = ax1.plot(dlev, mlev, color=color, linestyle=ls,
-                     linewidth=lw, marker='o', markersize=ms, label=label)
-    ax1.plot(dlev[0], mlev[0], marker='_', color=color, markersize=30,   # <-- top marker
-                markeredgecolor='black', markeredgewidth=0.5, zorder=5)
-    handles.append(line)
-
-    if ax2 is not None:
-        ax2.plot(dlev, mlev, color=color, linestyle=ls,
-                 linewidth=lw, marker='o', markersize=ms)
-
 # ---- Legend ----
-ax1.legend(handles=handles, fontsize=8, loc='upper left',
+ax1.legend(fontsize=8, loc=4,
            framealpha=0.85, edgecolor='gray')
 
 # ---- Titles ----
@@ -179,5 +166,5 @@ if ax2 is not None:
 plt.tight_layout()
 os.makedirs(os.path.dirname(fig_file), exist_ok=True)
 plt.savefig(fig_file, dpi=150, bbox_inches='tight')
-print(f'\n{fig_file.replace(home+"/E3SM/","")}\n')
+print(f'saved as\n{fig_file}\n')
 plt.close()
