@@ -17,32 +17,23 @@ def add_grid(file_path, **kwargs):
 #-------------------------------------------------------------------------------
 
 grid_root = '/projects/ccsm/inputdata/atm/scream/init'
-add_grid(f'{grid_root}/vertical_coordinates_L128_20220927.nc', n='L128', c='gray', sponge="14")
+add_grid(f'{grid_root}/vertical_coordinates_L128_20220927.nc', n='L128', c='gray', sponge='14')
 add_grid(f'{grid_root}/vertical_coordinates_L72_20220927.nc', n='L72',  c='black')
 
-grid_root = '/tscratch/smturbe/strat_scratch/vert_grid_files'
-# add_grid(f'{grid_root}/SCREAM_L236_c20250512_alpha_1.0_pm_300.nc',  n='L236', c='gray')
-# add_grid(f'{grid_root}/SCREAM_vertical_levels_L184.nc',   n='L184 alpha=1.0 pm=300', c='red')
-# add_grid(f'{grid_root}/vertical_coordinates_L177_20260507.nc',  n='L177', c='pink')
-# add_grid(f'{grid_root}/SCREAM_L232_c20250512_alpha_1.0_pm_300.nc', n='L232', c='gray')
-# add_grid(f'{grid_root}/SCREAM_L182_c20250512_alpha_1.0_pm_300.nc', n='L184', c='purple')
-
-# 10 vlevs with different slopes
+# vlevs with different dz slopes
+grid_root = '/projects/scream_strat/smturbe/vert_grid'
 # slope = 0
-# add_grid(f"{grid_root}/SCREAM_L234_c20250512_alpha_1.0_pm_300.nc", n="L234", c="red")
-# slope =  2 m / level
-# add_grid(f"{grid_root}/SCREAM_L208_c20250512_alpha_1.0_pm_300.nc", n="L208", c="red")
+add_grid(f'{grid_root}/vertical_coordinates_L256_20260702.nc', n='L256', c='red')
 # # slope =  5 m / level
-add_grid(f"{grid_root}/SCREAM_L192_c20250512_alpha_1.0_pm_300.nc",n="L192", c="orange", sponge="19")
-# add_grid(f"{grid_root}/SCREAM_L171_c20250512_alpha_1.0_pm_300.nc", n="L171", c="yellow")
+add_grid(f'{grid_root}/vertical_coordinates_L192_20260608.nc', n='L192', c='orange')
 # # slope = 10 m / level
-# add_grid(f"{grid_root}/SCREAM_L155_c20250512_alpha_1.0_pm_300.nc", n="L155", c="yellowgreen")
-# # slope = 20 m / level
-# add_grid(f"{grid_root}/SCREAM_L160_c20250512_alpha_1.0_pm_300.nc",n="L160", c="green")
+add_grid(f'{grid_root}/vertical_coordinates_L176_20260702.nc', n='L176', c='yellowgreen')
+# slope = 20 m / level
+add_grid(f'{grid_root}/vertical_coordinates_L160_20260702.nc',n='L160', c='green')
 # # slope = 30 m / level
-# add_grid(f"{grid_root}/SCREAM_L152_c20250512_alpha_1.0_pm_300.nc", n="L152", c="C0")
-# # slope = 50 m / level
-# add_grid(f"{grid_root}/SCREAM_L126_c20250512_alpha_1.0_pm_300.nc", n="L126", c="purple")
+add_grid(f'{grid_root}/vertical_coordinates_L152_20260702.nc', n='L152', c='C0')
+# slope =40 m / level
+add_grid(f'{grid_root}/vertical_coordinates_L144_20260702.nc', n='L144', c='darkblue')
 
 #-------------------------------------------------------------------------------
 # Settings
@@ -50,7 +41,7 @@ add_grid(f"{grid_root}/SCREAM_L192_c20250512_alpha_1.0_pm_300.nc",n="L192", c="o
 print_table     = False
 use_height      = True   # use height (km) for Y-axis; else use pressure (hPa)
 add_zoomed_plot = False
-add_sponge_layer = True
+add_sponge_layer = False
 zoom_top_idx    = -30     # index cutoff for zoomed panel
 if use_height:
     fig_file    = os.path.join('figs_vert_grid/vertical_grid_spacing_km.png')
@@ -139,7 +130,7 @@ for opts in opt_list:
                 markeredgecolor='black', markeredgewidth=0.5, zorder=5)
     if add_sponge_layer:
         if sponge_layer is not None:
-            ax1.axhline(y=lev[sponge_layer], xmin=0, xmax=2500, color=color, linestyle="dashed", alpha=0.7)
+            ax1.axhline(y=lev[sponge_layer], xmin=0, xmax=2500, color=color, linestyle='dashed', alpha=0.7)
     if ax2 is not None:
         ax2.plot(dlevz, mlevz, color=color, linestyle=ls,
                  linewidth=lw, marker='o', markersize=ms)

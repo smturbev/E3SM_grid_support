@@ -9,12 +9,12 @@ COLORS=['C0','C1','C2','C3']
 VARS=['T_mid','horiz_winds','nc','ni','qc','qi','o3_volume_mix_ratio']
 
 def main(icfile_dict):
-    if icfile_dict=="example":
+    if icfile_dict=='example':
         inputdata = '/projects/ccsm/inputdata/atm/scream/init'
         icfile_dict = {'ne30np4L72':f'{inputdata}/screami_ne30np4L72_20220823.nc'}
     
     labels = icfile_dict.keys()
-    print("Labels:\n", labels)
+    print('Labels:\n', labels)
     fig= plt.figure(figsize=(30,16))
         
     # loop thru variables in file
@@ -25,7 +25,7 @@ def main(icfile_dict):
         # loop thru ic files
         for i,lbl in enumerate(labels):
             print(i, icfile_dict[lbl])
-            ic = xr.open_dataset(icfile_dict[lbl], engine="netcdf4")
+            ic = xr.open_dataset(icfile_dict[lbl], engine='netcdf4')
             ic[var].isel(time=0).mean(dim=['ncol']).plot(y='lev', ax=ax, color=COLORS[i], label=lbl)
         ax.set(ylim=(1000,0.1), yscale='log')
     ax.legend()

@@ -342,7 +342,7 @@ def calc_levs(slope=None, discard_below_1mPa=False):
     dk_list = [ 1, 1, 4, 8, 8, 4, 2, 1, 1, 1, 6,   6, 60] 
     dz_list = [20,10,20,30,40,50,60,70,80,90,100,200,250] 
     dz_start = dz_list[-1]
-    print("dz at 15 km:", dz_start, "m")
+    print("dz at 18.5 km:", dz_start, "m")
     # calculate the slope from current zlev to ~60 km
     zlev_lower = np.sum(np.multiply(np.array(dk_list), np.array(dz_list))) # current top give by dz from surface upward
     zlev_modeltop = 60000 - (1500*4)  # 60 km model top minus the top 6 levels have a dz=1500m
@@ -658,7 +658,7 @@ def pres2height(ilev, H=6740):
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
-    main(slope=5.0, hy_alpha=1.0, hy_pm=300)
+    main(slope=0.0, hy_alpha=1.0, hy_pm=300)
     # print_vlevs_dz()
     # (dz, ilev, zlev, num_ilev, num_mlev) = calc_levs(slope=1.0)
     # print(f"{ilev[0]} hPa to {ilev[-1]} hPa with {num_ilev} interface levels.")

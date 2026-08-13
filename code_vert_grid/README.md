@@ -1,34 +1,37 @@
-# New vertical grids
+# New vertical grids for a stratosphere in SCREAM
+
+This documents the process used to generate the variable resolution vertical grid for adding a stratopshere to SCREAM, varying the layer depth in the stratosphere from about 250 m to 1500 m. The model top is defined at 0.1 hPa or about 60 km. 
 
 ## 1. Creating new pressure levels
 
-There are infinite ways you could make new vertical levels in pressure. Due to the way E3SM works, the number of vertical levels should be a multiple of 8 (midlayer levels, as the interface levels will be a multiple of 8 + 1). So, even if you make a vertical coordinate that is not a multiple of 8, E3SM will round up to the nearest multiple of 8 in its calculations and use up that much in memory so it's just better to use a multiple of 8. The code I've generated in this repo makes a few automatic checks for monotonically increasing grid spacing in dz and will adjust the number of levels to the nearest multiple of 8. 
+There are numerous ways you could make new vertical levels in pressure. Due to the way E3SM works, the number of vertical levels should be a multiple of 8 (midlayer levels, as the interface levels will be a multiple of 8 + 1). So, even if you make a vertical coordinate that is not a multiple of 8, E3SM will round up to the nearest multiple of 8 in its calculations and use up that much in memory so it's just better to use a multiple of 8 if you enjoy efficiency. The code for adding a stratosphere ([2026_generate_high-res-strat_pressure-vs-terrain.py](2026_generate_high-res-strat_pressure-vs-terrain.py)) makes a few automatic checks for monotonically increasing grid spacing in dz and will adjust the number of levels to the nearest multiple of 8. 
 
-I'll outline my method here (see 2026_generate_high-res-strat_pressure-vs-terrain.py for generating new vertical coordinates, essentially step 1).
+The method used for adding a stratosphere is breifly explained here (see [2026_generate_high-res-strat_pressure-vs-terrain.py](2026_generate_high-res-strat_pressure-vs-terrain.py) for generating new vertical coordinates, essentially Steps 1-3).
 
 ### A. Use dz to make height levels
 
-Using L128 as an example, ```dk_list``` is the number of times that each item in ```dz_list``` is repeated. So $dz = 250$m repeats 90 times. 
-```
-dk_list = [ 1, 1, 2, 2, 2, 2, 2, 2, 2,  2, 200,   6,    6,   1,   1]  # sums to 232
-dz_list = [20,10,30,40,50,60,70,80,90,100, 250, 500, 1000,1250,1500]
-
-zlev = np.zeros(np.sum(dk_list)+1)
-kk = 1
-for d,dk in enumerate(dk_list):
-    for k in range(dk):
-        zlev[kk] = zlev[kk-1] + dz_list[d]
-        dz.append(dz_list[d])
-        # print(f'{kk}  {zlev[kk]:10.1}  {dz_list[d]}')
-        kk += 1
+Let's use L192 as an example. The troposphere remains consistent, defining the depth of each layer in height (meters) ```dz_list```. The other list ```dk_list``` gives the number of times each ```dz``` repeats. For example the first layer of the atmosphere has a depth of 20 m, the second 10m, the third 20 m, the fourth 20 m, the fifth 20 m, and so on. The lists below build the base of the vertical grid from the ground up to about 18.5 km.
 
 ```
-Then convert that to pressure levels using scale height (or your favorite method to get from height to pressure - I also tried ```metpy.height_to_pressure_std()```)
+dk_list = [ 1, 1, 4, 8, 8, 4, 2, 1, 1, 1, 6,   6, 60] 
+dz_list = [20,10,20,30,40,50,60,70,80,90,100,200,250]
 
-$$ p = e^{-1*z/H } * 1000 $$
+```
 
-where $p$  (```ilev```) is the vertical coordinate in pressure (hPa), $z$ (```zlev```) is the vertical coordinate in height (m), and $H$ is the scale height which is 8.5 km in the standard atmosphere but 
-in climatology from WH, the scale height used is 6.7 km. 
+From 18.5 km, we then use a new method to calculate the depth of each layer, since we are generating several vertical grids to use as a sensitivity study to see how many levels are needed to represent gravity waves throughout the stratosphere. 
+
+The method herein uses a ```slope``` variable to determine how to generate the vertical layers. The ```slope``` is the amount that ``dz`` increases per layer to a maximum dz of 1500 m. See ```make_vlevs_from_dz0(m=slope,dz0=18.5,H=model_top_m)```.
+
+The top few layer should have a depth of 1500 m or larger to make the sponge layer better.
+
+Finally, the number of levels (midpoints) should be a multiple of 8. See ```adjust_interfaces_to_blocks_of_8_plus_1(zlev_interfaces)```. A few more checks are done, then the vlevs are converted from height to pressure levels, inverted, converted to hybrid coefficients (see next step), then saved as a netcdf file. 
+
+    \textit{Note:} We use scale height to convert height to pressure, and the vertical grid generated changes slightly based on what scale height you choose. I also tried using ```metpy.height_to_pressure_std()``` and got a slightly different vertical levels.
+
+    $$ p = e^{-1*z/H } * 1000 $$
+
+    where $p$  (```ilev```) is the vertical coordinate in pressure (hPa), $z$ (```zlev```) is the vertical coordinate in height (m), and $H$ is the scale height which is 8.5 km in the standard atmosphere but 
+    in climatology from WH, the scale height used is 6.7 km. 
 
 ## 2. Calculate the hybrid coefficients
 
@@ -71,7 +74,7 @@ ncgen vert_coord.txt -o vert_coord.nc
 
 The initial condition file needs the following variables: physical fields of PS, PHSI, T, Q, U, V, and vertical coordinate related variables, namely, P0,  hyam, hybm, hyai, hybi for hybrid simga-pressure coordinate and lev and ilev for constant pressure levels.
 
-Remapping the initial condition file from L72 to your new vertical levels (just run ```./2026_generate_IC_newlevs.sh```)
+Remapping the initial condition file from L72 (which has a model top at 0.1 hPa) to your new vertical levels (just run ```./2026_generate_IC_newlevs.sh```). \textit{Note: using intial condition files from L128 will not work due to the different model top height.}
 
 The important line uses ncremap
 ```bash
@@ -81,13 +84,21 @@ IC_DST=<scratch_output_path_for_new_ic_file>
 
 ncremap --vrt_fl=${VG_DST} --ps_nm=ps --in_fl=${IC_SRC} --out_fl=${IC_DST}
 ```
-The output file should be netcdf4/hdf5, which should then be moved to the inputdata directory (```<inputdata_dir>/atm/scream/init/```). 
+The output file should be netcdf4/hdf5, which should then be moved to the inputdata directory (```<inputdata_dir>/atm/scream/init/```) or wherever you want to store the vertical grids.
 
 If you get a bunch of warnings, see troubleshooting IC files [below](##-ic-file-generation-is-throwing-a-lot-of-warnings)
 
 ## 5. Update ```cime_config``` paths for EAMxx
 
-Finally, we need to update the cime_config file with the list of files to use for each compset in EAMxx. For this example, we generate a new vertical grid and ic file with 177 vertical levels. We need to update two places in the namelist defaults for EAMxx (vertical coordinate filename and initial condition filename). See example below.
+\textit{Hacky way:} Update the namelist option for the vertical grid file in your run script
+
+```
+./xmlchange SCREAM_CMAKE_OPTIONS="SCREAM_NP 4 SCREAM_NUM_VERTICAL_LEV ${nlevs} SCREAM_NUM_TRACERS 10"
+./atmchange initial_conditions::filename=${scream_init_file}
+./atmchange vertical_coordinate_filename=${scream_vertical_grid_file}
+```
+
+\textit{Better way:} We need to update the cime_config file with the list of files to use for each compset in EAMxx. For this example, we generate a new vertical grid and ic file with 192 vertical levels. We need to update two places in the namelist defaults for EAMxx (vertical coordinate filename and initial condition filename). See example below.
 
 ```<E3SM_code_dir>/components/eamxx/cime_config/namelist_defaults.xml```
 ```bash
@@ -95,22 +106,24 @@ Finally, we need to update the cime_config file with the list of files to use fo
   <grids_manager>
     <type>homme</type>
     ...
-    <vertical_coordinate_filename nlev="177">${DIN_LOC_ROOT}/atm/scream/init/vertical_coordinates_L177_20260507.nc</vertical_coordinate_filename>
+    <vertical_coordinate_filename nlev="192">${DIN_LOC_ROOT}/atm/scream/init/vertical_coordinates_L192_20260702.nc</vertical_coordinate_filename>
   </grids_manager>
 
 <!-- List of nc files for loading inputs on specified grids -->
   <initial_conditions>
    ...
-   <filename hgrid="ne30np4" nlev="177">${DIN_LOC_ROOT}/atm/scream/init/screami_ne30np4L177_20260512.nc</filename>
+   <filename hgrid="ne30np4" nlev="192">${DIN_LOC_ROOT}/atm/scream/init/screami_ne30np4L192_20260702.nc</filename>
    ...
 ```
 
 ## 6. Run DP-EAMxx
 
-Example run script is in [runscripts/run_dpxx_scream_rce.flight.csh](../../runscripts/run_dpxx_scream_rce.flight.csh). The name change to make is in SCREAM_NUM_VERTICAL_LEV.
+Example run script is in [runscripts/run_dpxx_scream_rce.flight.csh](../../runscripts/run_dpxx_scream_rce.flight.csh). The name change to make is in SCREAM_NUM_VERTICAL_LEV. It is also important to add the namelist option for setting the sponge layer start pressure (in hPa); the default is tom_sponge_start=0 which is not configured for a model top above the stratopause, so you should set this manually. 
+TODO: sensitivity study to determine the best height/depth of the sponge layer. 
 
 ```csh
- ./xmlchange SCREAM_CMAKE_OPTIONS="`./xmlquery -value SCREAM_CMAKE_OPTIONS | sed 's/SCREAM_NUM_VERTICAL_LEV [0-9][0-9]*/SCREAM_NUM_VERTICAL_LEV 177/'`"  
+./xmlchange SCREAM_CMAKE_OPTIONS="SCREAM_NP 4 SCREAM_NUM_VERTICAL_LEV 192 SCREAM_NUM_TRACERS 10" 
+./atmchange ctl_nl::tom_sponge_start=2.0 -b
 ```
 
 
@@ -121,8 +134,6 @@ Model physics time step: 100 s
 Model dynamics time step: 8.3333333333333 s (should be $\frac{1}{12}$ of physics time step)
 Second order viscosity near model top (nu_top): 1e4 m2/s
 
-Run time:
-- Running L133 (E3SM master branch) on 5 nodes on flight (ndays=10) took X mins of wallclocktime (no wait in queue on flight)
 
 
 # Troubleshooting
@@ -130,6 +141,9 @@ Run time:
 First try updating your local E3SM repo and submodules
 
 ```git submodule update --init --recursive```
+
+And make sure your fork/branch is up to date with E3SM-Project/E3SM and especially the submodules - sometimes it is good to just clone a fresh repo if you are running into problems.
+
 
 ## IC file generation is throwing a lot of warnings
 
@@ -165,15 +179,6 @@ Error! Source field allocation is not compatible with the requested value type.
 # Resources and Acknowledgements
 
 - E3SM atlassian page on generating new initial conditions [here](https://e3sm.atlassian.net/wiki/spaces/DOC/pages/1002373272/Generate+atm+initial+condition+from+analysis+data)
-- Much thanks to @whannah1 for the advice and [this repo](https://github.com/whannah1/E3SM_grid_support). 
-
-
-
-
-
-
-
-
-
+- Much thanks to @whannah1 for the advice and [this parent repo](https://github.com/whannah1/E3SM_grid_support). 
 
 

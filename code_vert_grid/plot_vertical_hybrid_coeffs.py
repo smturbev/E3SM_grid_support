@@ -23,12 +23,13 @@ grid_root = '/projects/ccsm/inputdata/atm/scream/init'
 add_grid(f'{grid_root}/vertical_coordinates_L128_20220927.nc', n='L128', c='blue')
 add_grid(f'{grid_root}/vertical_coordinates_L72_20220927.nc', n='L72',  c='black')
 
-grid_root = '/tscratch/smturbe/strat_scratch/vert_grid_files'
-add_grid(f'{grid_root}/SCREAM_L184_c20260501_alpha_1.0_pm_300.nc',  n='L184 alpha=1.0 pm=300', c='gray')
-add_grid(f'{grid_root}/SCREAM_fromL128metpyto1mPa_c20260501_alpha_1.0_pm_300.nc',   n='L177 alpha=1.5 pm=300', c='red')
-# add_grid(f'{grid_root}/SCREAM_L184_c20260501_alpha_2.0_pm_300.nc',   n='L184 alpha=2.0 pm=300', c='green')
-# add_grid(f'{grid_root}/SCREAM_L184_c20260501_alpha_2.5_pm_300.nc',   n='L184 alpha=2.5 pm=300', c='blue')
-# add_grid(f'{grid_root}/SCREAM_L184_c20260501_alpha_3.0_pm_300.nc',   n='L184 alpha=3.0 pm=300', c='purple')
+grid_root = '/projects/scream_strat/smturbe/vert_grid'
+add_grid(f'{grid_root}/vertical_coordinates_L256_20260702.nc', n='L256', c='red')
+# add_grid(f'{grid_root}/vertical_coordinates_L192_20260608.nc', n='L192', c='orange')
+# add_grid(f'{grid_root}/vertical_coordinates_L176_20260702.nc', n='L176', c='yellowgreen')
+# add_grid(f'{grid_root}/vertical_coordinates_L160_20260702.nc',n='L160', c='green')
+# add_grid(f'{grid_root}/vertical_coordinates_L152_20260702.nc', n='L152', c='C0')
+# add_grid(f'{grid_root}/vertical_coordinates_L144_20260702.nc', n='L144', c='darkblue')
 
 
 #-------------------------------------------------------------------------------
@@ -107,8 +108,8 @@ for opts in FILE_LIST:
     lev_max = np.max(lev)
     ax2.plot(ds['hyai']/denom, lev/lev_max, color=color, linestyle='solid', linewidth=lw)
     ax2.plot(ds['hybi']/denom, lev/lev_max, color=color, linestyle='dashed', linewidth=lw)
-ax2.plot([0],[0], linestyle="solid", color='k', label="hyai")
-ax2.plot([0],[0], linestyle="dashed", color='k', label="hybi")
+ax2.plot([0],[0], linestyle='solid', color='k', label='hyai')
+ax2.plot([0],[0], linestyle='dashed', color='k', label='hybi')
 # ---- Panel 1 ----
 ax.set_xlabel('Hybrid Coefficient', fontsize=11)
 ax.set_ylabel('Level [hPa]', fontsize=11)
