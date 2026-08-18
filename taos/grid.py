@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 taos.grid — Grid file creation workflow.
 
@@ -252,7 +251,7 @@ def create_grid(cfg):
 
             # run homme_tool to create np4 grid template
             cmd = (f'cd {homme_tool_root} && {env_prefix} &&'
-                   f' srun -c 32 -N $SLURM_NNODES {homme_tool_root}/src/tool/homme_tool < {p["nl_file"]}')
+                   f' {homme_tool_root}/src/tool/homme_tool < {p["nl_file"]}')
             with timer.time('grid: homme_tool np4 template'):
                 run_cmd(cmd)
 

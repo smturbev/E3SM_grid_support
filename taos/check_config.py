@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/ascldap/users/smturbe/.conda/envs/smt_e3sm/bin/python
 """
 check_config.py — Print all resolved TAOS configuration values.
 

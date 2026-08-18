@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/ascldap/users/smturbe/.conda/envs/e3sm-unified_1.11/bin/python
 """
 check_grids.py — Print expected file paths for each grid in a TAOS project.
 

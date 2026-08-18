@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 taos.maps — Coupling map generation workflow.
 

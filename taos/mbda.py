@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 taos.mbda — Pure-Python disk-averaged remapping (MBDA replacement).
 

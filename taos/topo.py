@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 taos.topo — Topography processing workflow.
 
@@ -315,8 +314,8 @@ def _smooth_topo_python(cfg):
         _smooth_file(p['topo_file_3km_1'], p['topo_file_3km_2'], 'smooth: Python 3km np4')
 
 
-def _smooth_topo_homme(cfg):
-    """homme_tool topo_pgn_to_smoothed smoothing (requires homme_tool_root + srun)."""
+def _smooth_topo_homme(cfg, use_slurm=True):
+    """homme_tool topo_pgn_to_smoothed smoothing (requires homme_tool_root + srun or sbatch)."""
     with timer.time('smooth_topo'):
         # -------------------------------------------------------------------
         # resolve paths
@@ -344,9 +343,21 @@ def _smooth_topo_homme(cfg):
                 /
                 """)
             Path(p['nl_file_smooth']).write_text(nl_content)
-
+            if use_slurm:
+                print("UPDATED SUCCESSFULLY --- trying with slurm sbatch cmd")
+                # sbatch = f'sbatch'
+                # sbatch += f' --export=ALL'
+                # sbatch += f' --output={["slurm.slurm_log_root"]}/%x-%j.slurm.main.out'
+                # sbatch += f' --account={cfg["slurm.account"]}'
+                # sbatch += f' --reservation={cfg["slurm.res"]}'
+                # sbatch += f' --mail-user={cfg["slurm.mail_user"]}'
+                # sbatch += f' --mail-type={cfg["slurm.mail_type"]}'
+                # sbatch += f' -N 1 '
+                sbatch='srun --ntasks=112 '
+            else:
+                sbatch=''
             cmd = (f'cd {homme_tool_root} && {env_prefix} &&'
-                   f' srun -c 32 -N $SLURM_NNODES {homme_tool_root}/src/tool/homme_tool < {p["nl_file_smooth"]}')
+                   f' {sbatch} {homme_tool_root}/src/tool/homme_tool < {p["nl_file_smooth"]}')
             with timer.time(label):
                 run_cmd(cmd)
 
@@ -533,15 +544,19 @@ if __name__ == '__main__':
     if args.grid_name:
         cfg = cfg.for_grid(args.grid_name)
     cfg.validate()
-
+    print("STARTING TOPO GEN...")
     run_all = 'all' in args.stage
     timer.start_total()
     if run_all or 'grid' in args.stage:
+        print("STARTING GRID...")
         create_grid(cfg)
     if run_all or 'remap' in args.stage:
+        print("STARTING REMAP...")
         remap_topo(cfg, force_new_3km_data=args.force_new_3km_data)
     if run_all or 'smooth' in args.stage:
+        print("STARTING SMOOTHING...")
         smooth_topo(cfg)
     if run_all or 'sgh' in args.stage:
+        print("STARING SGH...")
         calc_topo_sgh(cfg)
     timer.summary()

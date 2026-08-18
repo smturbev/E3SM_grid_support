@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 taos.domain — Domain file generation workflow.
 

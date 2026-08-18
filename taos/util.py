@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 taos.util — Shared utilities for TAOS workflow scripts.
 """
