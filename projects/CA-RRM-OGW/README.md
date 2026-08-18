@@ -2,12 +2,12 @@
 - [x] check_config.py
 - [x] Build MOAB/MBDA on flight (Thanks, @BenHillman. Path = ```/projects/ccsm/mbda/mbda```)
 - [x] check_paths.py (needs moab)
-- [ ] Fix grid paths/names to work in this workflow
-- [ ] Edit `run_workflow.py` to specify which grids and steps will be handled
-- [ ] Generate grid file from scratch (within this workflow)
-- [ ] Generate map files from scratch (within this workflow)
-- [ ] Generate domain files from scratch (within this workflow)
-- [ ] Generate topo files (within this workflow)
+- [x] Fix grid paths/names to work in this workflow
+- [x] Edit `run_workflow.py` to specify which grids and steps will be handled
+- [x] Generate grid file from scratch (within this workflow)
+- [x] Generate map files from scratch (within this workflow)
+- [x] Generate domain files from scratch (within this workflow)
+- [x] Generate topo files (within this workflow) for CA32x8
 - [ ] Run `run_workflow.py` for a new grid in one streamlined step
 
 

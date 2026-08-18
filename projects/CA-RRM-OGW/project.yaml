@@ -75,7 +75,7 @@ paths:
   unified_src:     "$HOME/.conda/envs/e3sm-unified_1.11/etc/load_e3sm-unified_1.11.sh"
   homme_tool_root: "/tscratch/${USER}/homme_test/homme_tool"
   mbda_path:       ""
-  topo_file_src:   "/projects/ccsm/inputdata/atm/cam/hrtopo/USGS-topo-cube3000.nc" # best for simulations larger than 3km
+  topo_file_src:   "/projects/ccsm/inputdata/atm/cam/hrtopo/usgs-rawdata.nc"  # "USGS-topo-cube3000.nc" # best for simulations larger than 3km
   # topo_file_src:   ""
 
 # --- Topo options ------------------------------------------------------------
